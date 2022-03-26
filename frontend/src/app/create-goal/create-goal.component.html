@@ -50,7 +50,7 @@
                 <span class="input-group-text"
                     style="background-color: rgba(0, 0, 0, 0);color: #FFFFFF; border-color: rgba(0, 0, 0, 0); padding-left: 2px;"
                     id="inputGroup-sizing-default">Duration of goal (in weeks)</span>
-                <input type="number" [ngClass]="{ 'invalid-input': submitted && form.durationOfGoal.errors }"
+                <input type="number" [min]="1" max="21" [ngClass]="{ 'invalid-input': submitted && form.durationOfGoal.errors }"
                     formControlName="durationOfGoal" class="form-control" aria-label="Sizing example input"
                     style="background-color: #191919; color: #FFFFFF; border-color: #191919;"
                     aria-describedby="inputGroup-sizing-default">
@@ -71,7 +71,7 @@
                 <span class="input-group-text" id="inputGroup-sizing-default"
                     style="background-color: rgba(0, 0, 0, 0);color: #FFFFFF; border-color: rgba(0, 0, 0, 0); padding-left: 2px;">Frequency
                     of event</span>
-                <input type="number" [ngClass]="{ 'invalid-input': submitted && form.frequency.errors }"
+                <input type="number" [min]="1" [max]="21" [ngClass]="{ 'invalid-input': submitted && form.frequency.errors }"
                     class="form-control" aria-label="Sizing example input" formControlName="frequency"
                     style="background-color: #191919; color: #FFFFFF; border-color: #191919;"
                     aria-describedby="inputGroup-sizing-default">

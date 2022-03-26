@@ -36,11 +36,11 @@ export class DashboardComponent implements OnInit {
       locked: Number(ethers.utils.formatUnits(data.locked, this.globalService.TokenDecimals)),
       rewards: 0
     }
-    console.log({money: this.money})
+    console.log({ money: this.money })
   }
 
   getColors(i: number) {
-    let j = i%5
+    let j = i % 5
     return ['#558CFF', '#93FFD8', '#ECDBBA', '#F37171', '#7C33EB'][j]
   }
 
@@ -56,18 +56,22 @@ export class DashboardComponent implements OnInit {
       for (let i = 0; i < goalIDs[0].length; i++) {
         let goal = await this.globalService.GoalManagerContract.functions.getGoalByID(goalIDs[0][i])
         console.log(goal)
-        this.goals.push({id: goalIDs[0][i], ...goal})
+        this.goals.push({ id: goalIDs[0][i], ...goal })
       }
       console.log('Goals', this.goals)
       this.loader.loaderEnd()
-    } catch(err) {
+    } catch (err) {
       this.loader.loaderEnd()
     }
   }
 
   navigate() {
     if (this.globalService.isConnected) {
-      this.router.navigate(['create-goal']);
+      if (window.ethereum.networkVersion === '80001') {
+        this.router.navigate(['create-goal']);
+      } else {
+        alert('Please change your network to Polygon Mumbai Testnet to create goals.')
+      }
     } else {
       this.globalService.connectMetamask()
     }
@@ -75,7 +79,11 @@ export class DashboardComponent implements OnInit {
 
   goalPage(i: string | number) {
     if (this.globalService.isConnected) {
-      this.router.navigate([`goal-progress/${i}`]);
+      if (window.ethereum.networkVersion === '80001') {
+        this.router.navigate([`goal-progress/${i}`]);
+      } else {
+        alert('Please change your network to Polygon Mumbai Testnet to create goals.')
+      }
     } else {
       this.globalService.connectMetamask()
     }
