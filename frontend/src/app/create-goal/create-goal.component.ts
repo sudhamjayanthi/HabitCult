@@ -99,17 +99,21 @@ export class CreateGoalComponent implements OnInit {
 
   async approveToken() {
     try {
-      this.submitted = true;
-      if (this.createGoalForm.valid) {
-        this.loader.loaderStart()
-        await this.globalService.waitForConnect()
-        let inWei = ethers.utils.parseUnits(this.betAmount.toString(), this.globalService.TokenDecimals).toString()
-        let approve = await this.globalService.TokenContract.connect(this.globalService.signer).functions.approve(this.globalService.GoalManagerAddress, inWei) 
-        console.log(approve)
-        await approve.wait(2)
-        console.log('token approved')
-        this.isTokenAllowed = true;
-        this.loader.loaderEnd()
+      if (window.ethereum.networkVersion === '80001') {
+        this.submitted = true;
+        if (this.createGoalForm.valid) {
+          this.loader.loaderStart()
+          await this.globalService.waitForConnect()
+          let inWei = ethers.utils.parseUnits(this.betAmount.toString(), this.globalService.TokenDecimals).toString()
+          let approve = await this.globalService.TokenContract.connect(this.globalService.signer).functions.approve(this.globalService.GoalManagerAddress, inWei) 
+          console.log(approve)
+          await approve.wait(2)
+          console.log('token approved')
+          this.isTokenAllowed = true;
+          this.loader.loaderEnd()
+        }
+      } else {
+        alert('Please change your network to Polygon Mumbai Testnet to create goals.')
       }
     } catch (err) {
       this.loader.loaderEnd()
@@ -128,35 +132,39 @@ export class CreateGoalComponent implements OnInit {
 
   async createGoal() {
     try {
-      this.submitted = true;
-      if (this.createGoalForm.valid) {
-        this.loader.loaderStart()
-        await this.globalService.waitForConnect()
-        console.log({ addr: await this.globalService.signer.getAddress() })
-        let inWei = ethers.utils.parseUnits(this.betAmount.toString(), this.globalService.TokenDecimals).toString()
-        let name = this.createGoalForm.value.goalName;
-        let objectiveInWords = this.createGoalForm.value.goalDescription;
-        let category = this.createGoalForm.value.goalCategory;
-        let participant: User = {
-          addr: this.createGoalForm.value.address || await this.globalService.signer.getAddress(),
-          nick: this.createGoalForm.value.name
+      if (window.ethereum.networkVersion === '80001') {
+        this.submitted = true;
+        if (this.createGoalForm.valid) {
+          this.loader.loaderStart()
+          await this.globalService.waitForConnect()
+          console.log({ addr: await this.globalService.signer.getAddress() })
+          let inWei = ethers.utils.parseUnits(this.betAmount.toString(), this.globalService.TokenDecimals).toString()
+          let name = this.createGoalForm.value.goalName;
+          let objectiveInWords = this.createGoalForm.value.goalDescription;
+          let category = this.createGoalForm.value.goalCategory;
+          let participant: User = {
+            addr: this.createGoalForm.value.address || await this.globalService.signer.getAddress(),
+            nick: this.createGoalForm.value.name
+          }
+          const period = 90, eventsPerPeriod = this.createGoalForm.value.frequency, nPeriods = this.createGoalForm.value.durationOfGoal, targetType = Number(this.createGoalForm.value.targetType), betAmount = inWei;
+    
+          let validators: User[] = []
+          validators = this.parseValidator(validators, 1)
+          validators = this.parseValidator(validators, 2)
+          validators = this.parseValidator(validators, 3)
+          validators = this.parseValidator(validators, 4)
+          validators = this.parseValidator(validators, 5)
+          console.log('add goal', { name, objectiveInWords, category, participant, validators, period, eventsPerPeriod, nPeriods, targetType, betAmount })
+          let addGoal = await this.globalService.CultManagerContract.connect(this.globalService.signer).functions.addGoal(name, objectiveInWords, category, participant, validators, period, eventsPerPeriod, nPeriods, targetType, betAmount)
+          console.log(addGoal)
+          await addGoal.wait(2)
+          this.loader.loaderEnd()
+          this.router.navigate(['dashboard'])
+        } else {
+          this.loader.loaderEnd()
         }
-        const period = 90, eventsPerPeriod = this.createGoalForm.value.frequency, nPeriods = this.createGoalForm.value.durationOfGoal, targetType = Number(this.createGoalForm.value.targetType), betAmount = inWei;
-  
-        let validators: User[] = []
-        validators = this.parseValidator(validators, 1)
-        validators = this.parseValidator(validators, 2)
-        validators = this.parseValidator(validators, 3)
-        validators = this.parseValidator(validators, 4)
-        validators = this.parseValidator(validators, 5)
-        console.log('add goal', { name, objectiveInWords, category, participant, validators, period, eventsPerPeriod, nPeriods, targetType, betAmount })
-        let addGoal = await this.globalService.CultManagerContract.connect(this.globalService.signer).functions.addGoal(name, objectiveInWords, category, participant, validators, period, eventsPerPeriod, nPeriods, targetType, betAmount)
-        console.log(addGoal)
-        await addGoal.wait(2)
-        this.loader.loaderEnd()
-        this.router.navigate(['dashboard'])
       } else {
-        this.loader.loaderEnd()
+        alert('Please change your network to Polygon Mumbai Testnet to create goals.')
       }
     } catch (err: any) {
       console.error(err)
